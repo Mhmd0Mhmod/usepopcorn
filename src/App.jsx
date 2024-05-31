@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ButtonToggle from "./Components/ButtonToggle";
 import ListBox from "./Components/ListBox";
 import Logo from "./Components/Logo";
@@ -9,6 +9,7 @@ import NavBar from "./Components/NavBar";
 import Result from "./Components/Result";
 import Search from "./Components/Search";
 import Summary from "./Components/Summary";
+import { KEY, Key } from "./config";
 const tempMovieData = [
   {
     imdbID: "tt1375666",
@@ -55,11 +56,33 @@ const tempWatchedData = [
     userRating: 9,
   },
 ];
+
 export default function App() {
-  const [movies, setMovies] = useState(tempMovieData);
-  const [isOpen2, setIsOpen2] = useState(true);
-  const [isOpen1, setIsOpen1] = useState(true);
-  const [watched, setWatched] = useState(tempWatchedData);
+  const [movies, setMovies] = useState([]);
+  const [watched, setWatched] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const query = "interstellar";
+  const [error, setError] = useState("");
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        setIsLoading(true);
+        const response = await fetch(`http://www.omdbapi.com/?apikey=${KEY}&s=${query}`);
+        if (!response.ok) throw new Error("An error occurred. Please try again later.");
+        const data = await response.json();
+        if (data.Response === "False") throw new Error("No results found.");
+        setMovies(data.Search);
+      } catch (e) {
+        setError(e.message);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchData();
+    return () => {
+      console.log("cleanup");
+    };
+  }, []);
   return (
     <>
       <NavBar>
@@ -69,7 +92,10 @@ export default function App() {
       </NavBar>
       <Main>
         <ListBox>
-          <MoviesList movies={movies} />
+          {/* {isLoading ? <Loader /> : Error ? <ErrorMessage message={Error} /> : <MoviesList movies={movies} />} */}
+          {isLoading && <Loader />}
+          {!isLoading && error && <ErrorMessage message={error} />}
+          {!isLoading && !error && <MoviesList movies={movies} />}
         </ListBox>
         <ListBox>
           <Summary watched={watched} />
@@ -77,5 +103,16 @@ export default function App() {
         </ListBox>
       </Main>
     </>
+  );
+}
+function Loader() {
+  return <p className="loader">Loading...</p>;
+}
+function ErrorMessage({ message }) {
+  return (
+    <p className="error">
+      <span>⛔</span>
+      {message}
+    </p>
   );
 }
