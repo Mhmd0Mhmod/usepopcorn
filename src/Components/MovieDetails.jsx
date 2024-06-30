@@ -11,7 +11,9 @@ export default function MovieDetails({ selectedId, onCloseMovie, handleAddWatchL
     async function getMovieDetails() {
       setLoading(true);
       try {
-        const response = await fetch(`http://www.omdbapi.com/?apikey=${KEY}&i=${selectedId}`);
+        const response = await fetch(`http://www.omdbapi.com/?apikey=${KEY}&i=${selectedId}`, {
+          referrerPolicy: "unsafe-url",
+        });
         const data = await response.json();
         if (data.Error) throw new Error(data.Error);
         setData(data);
