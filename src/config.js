@@ -23,7 +23,7 @@ export const tempMovieData = [
   },
 ];
 
-const tempWatchedData = [
+export const tempWatchedData = [
   {
     imdbID: "tt1375666",
     Title: "Inception",

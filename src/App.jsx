@@ -8,15 +8,24 @@ import NavBar from "./Components/NavBar";
 import Result from "./Components/Result";
 import Search from "./Components/Search";
 import Summary from "./Components/Summary";
-import { KEY } from "./config";
+import { KEY, tempMovieData, tempWatchedData } from "./config";
+import MovieDetails from "./Components/MovieDetails";
+import Loader from "./Components/Loader";
+import ErrorMessage from "./Components/ErrorMessage";
 
 export default function App() {
   const [query, setQuery] = useState("");
   const [movies, setMovies] = useState([]);
-  const [watched, setWatched] = useState([]);
+  const [watched, setWatched] = useState(tempWatchedData);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [selectedId, setSelectedId] = useState(null);
+  function handleSelectMovie(id) {
+    setSelectedId((selectedId) => (selectedId === id ? null : id));
+  }
+  function onCloseMovie() {
+    setSelectedId(null);
+  }
   useEffect(() => {
     async function fetchData() {
       try {
@@ -53,25 +62,20 @@ export default function App() {
         <ListBox>
           {/* {isLoading ? <Loader /> : Error ? <ErrorMessage message={Error} /> : <MoviesList movies={movies} />} */}
           {isLoading && <Loader />}
+          {!isLoading && !error && <MoviesList onSelectMovie={handleSelectMovie} movies={movies} />}
           {!isLoading && error && <ErrorMessage message={error} />}
-          {!isLoading && !error && <MoviesList movies={movies} />}
         </ListBox>
         <ListBox>
-          <Summary watched={watched} />
-          <MoviesToWatch watched={watched} />
+          {selectedId ? (
+            <MovieDetails selectedId={selectedId} onCloseMovie={onCloseMovie} />
+          ) : (
+            <>
+              <Summary watched={watched} />
+              <MoviesToWatch watched={watched} />
+            </>
+          )}
         </ListBox>
       </Main>
     </>
-  );
-}
-function Loader() {
-  return <p className="loader">Loading...</p>;
-}
-function ErrorMessage({ message }) {
-  return (
-    <p className="error">
-      <span>⛔</span>
-      {message}
-    </p>
   );
 }
