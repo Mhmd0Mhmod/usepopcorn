@@ -16,7 +16,7 @@ import ErrorMessage from "./Components/ErrorMessage";
 export default function App() {
   const [query, setQuery] = useState("");
   const [movies, setMovies] = useState([]);
-  const [watched, setWatched] = useState(tempWatchedData);
+  const [watched, setWatched] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [selectedId, setSelectedId] = useState(null);
@@ -26,17 +26,32 @@ export default function App() {
   function onCloseMovie() {
     setSelectedId(null);
   }
+  function handleAddWatchList(newWatchedMovie) {
+    setWatched((watched) => [
+      ...watched.filter((movie) => movie.imdbID !== newWatchedMovie.imdbID),
+      newWatchedMovie,
+    ]);
+  }
+  function handleDeleteWatched(id) {
+    setWatched((watched) => watched.filter((movie) => movie.imdbID !== id));
+  }
   useEffect(() => {
+    const controller = new AbortController();
     async function fetchData() {
       try {
+        setError("");
         setIsLoading(true);
-        const response = await fetch(`http://www.omdbapi.com/?apikey=${KEY}&s=${query}`);
+        const response = await fetch(`http://www.omdbapi.com/?apikey=${KEY}&s=${query}`, {
+          signal: controller.signal,
+        });
         if (!response.ok) throw new Error("An error occurred. Please try again later.");
         const data = await response.json();
-        if (data.Response === "False") throw new Error("No results found.");
+        console.log(data);
+        if (data.Response == "False") throw new Error("No results found.");
         setMovies(data.Search);
       } catch (e) {
-        setError(e.message);
+        console.log(e);
+        if (e.name !== "AbortError") setError(e.message);
       } finally {
         setIsLoading(false);
       }
@@ -47,8 +62,9 @@ export default function App() {
       return;
     }
     fetchData();
-    return () => {
-      console.log("cleanup");
+    onCloseMovie();
+    return function () {
+      controller.abort();
     };
   }, [query]);
   return (
@@ -67,11 +83,16 @@ export default function App() {
         </ListBox>
         <ListBox>
           {selectedId ? (
-            <MovieDetails selectedId={selectedId} onCloseMovie={onCloseMovie} />
+            <MovieDetails
+              selectedId={selectedId}
+              onCloseMovie={onCloseMovie}
+              handleAddWatchList={handleAddWatchList}
+              watched={watched}
+            />
           ) : (
             <>
               <Summary watched={watched} />
-              <MoviesToWatch watched={watched} />
+              <MoviesToWatch watched={watched} handleDeleteWatched={handleDeleteWatched} />
             </>
           )}
         </ListBox>
