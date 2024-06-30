@@ -42,7 +42,6 @@ export default function App() {
         setError("");
         setIsLoading(true);
         const response = await fetch(`http://www.omdbapi.com/?apikey=${KEY}&s=${query}`, {
-          referrerPolicy: "unsafe-url",
           signal: controller.signal,
         });
         if (!response.ok) throw new Error("An error occurred. Please try again later.");
