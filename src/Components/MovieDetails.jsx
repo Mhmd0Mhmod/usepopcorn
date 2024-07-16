@@ -1,12 +1,20 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { KEY } from "../config";
 import StarRating from "../StarRating";
 import Loader from "./Loader";
+import { useKey } from "../hooks/useKey";
 
 export default function MovieDetails({ selectedId, onCloseMovie, handleAddWatchList, watched }) {
   const [data, setData] = useState({});
   const [loading, setLoading] = useState(true);
   const [userRating, setUserRating] = useState("");
+  const count = useRef(0);
+  useEffect(
+    function () {
+      if (userRating) count.current++;
+    },
+    [userRating]
+  );
   useEffect(() => {
     async function getMovieDetails() {
       setLoading(true);
@@ -23,15 +31,7 @@ export default function MovieDetails({ selectedId, onCloseMovie, handleAddWatchL
     }
     getMovieDetails();
   }, [selectedId]);
-  useEffect(() => {
-    function close(e) {
-      if (e.code == "Escape") onCloseMovie();
-    }
-    document.addEventListener("keydown", close);
-    return () => {
-      document.removeEventListener("keydown", close);
-    };
-  }, [onCloseMovie]);
+  useKey("Escape", onCloseMovie);
   const {
     Title: title,
     Year: year,
@@ -99,6 +99,7 @@ export default function MovieDetails({ selectedId, onCloseMovie, handleAddWatchL
                         director,
                         actors,
                         plot,
+                        countRatingDecisions: count.current,
                       };
                       handleAddWatchList(newWatchedMovie);
                       onCloseMovie();
