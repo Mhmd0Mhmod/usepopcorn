@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { KEY } from "../config";
+import { useKey } from "../hooks/useKey";
 import StarRating from "../StarRating";
 import Loader from "./Loader";
-import { useKey } from "../hooks/useKey";
 
 export default function MovieDetails({ selectedId, onCloseMovie, handleAddWatchList, watched }) {
   const [data, setData] = useState({});
@@ -19,7 +18,7 @@ export default function MovieDetails({ selectedId, onCloseMovie, handleAddWatchL
     async function getMovieDetails() {
       setLoading(true);
       try {
-        const response = await fetch(`http://www.omdbapi.com/?apikey=${KEY}&i=${selectedId}`, {});
+        const response = await fetch(`https://www.omdbapi.com/?apikey=${process.env.REACT_APP_API_KEY}&i=${selectedId}`, {});
         const data = await response.json();
         if (data.Error) throw new Error(data.Error);
         setData(data);

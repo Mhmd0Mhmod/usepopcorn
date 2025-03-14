@@ -1,4 +1,4 @@
-export const KEY = "453d257c";
+
 export const tempMovieData = [
   {
     imdbID: "tt1375666",

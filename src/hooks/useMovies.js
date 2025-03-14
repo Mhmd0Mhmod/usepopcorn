@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { KEY } from "../config";
 
 export function useMovies(query) {
   const [movies, setMovies] = useState([]);
@@ -11,7 +10,7 @@ export function useMovies(query) {
       try {
         setError("");
         setIsLoading(true);
-        const response = await fetch(`http://www.omdbapi.com/?apikey=${KEY}&s=${query}`, {
+        const response = await fetch(`https://www.omdbapi.com/?apikey=${process.env.REACT_APP_API_KEY}&s=${query}`, {
           signal: controller.signal,
         });
         if (!response.ok) throw new Error("An error occurred. Please try again later.");
